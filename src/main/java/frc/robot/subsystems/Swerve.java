@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
 
 public class Swerve extends SubsystemBase {
   public SwerveDriveOdometry swerveOdometry;
@@ -23,14 +24,14 @@ public class Swerve extends SubsystemBase {
     // gyro = new Pigeon2(Constants.Swerve.pigeonID);
     // gyro.configFactoryDefault();
     // zeroGyro();
-
+    gyro = new AHRS(SPI.Port.kMXP);
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw());
 
     mSwerveMods =
         new SwerveModule[] {
-          new SwerveModule(0, Constants.Swerve.Mod0.constants),
+          new SwerveModule(0, Constants.Swerve.Mod1.constants),
+          new SwerveModule(1, Constants.Swerve.Mod0.constants),
           new SwerveModule(2, Constants.Swerve.Mod2.constants),
-          new SwerveModule(1, Constants.Swerve.Mod1.constants),
           new SwerveModule(3, Constants.Swerve.Mod3.constants)
         };
   }
@@ -39,7 +40,7 @@ public class Swerve extends SubsystemBase {
       Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
     SwerveModuleState[] swerveModuleStates =
         Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-            false
+            true
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(
                     translation.getX(), translation.getY(), rotation, getYaw())
                 : new ChassisSpeeds(translation.getX(), translation.getY(), rotation));
@@ -88,7 +89,7 @@ public class Swerve extends SubsystemBase {
   public Rotation2d getYaw() {
     return (Constants.Swerve.invertGyro)
         ? Rotation2d.fromDegrees(360 - gyro.getYaw())
-        : Rotation2d.fromDegrees(gyro.getYaw());
+        : Rotation2d.fromDegrees(gyro.getFusedHeading());
   }
 
   @Override
