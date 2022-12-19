@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -40,7 +41,7 @@ public class SwerveModule {
   public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants) {
     this.moduleNumber = moduleNumber;
     angleOffset = moduleConstants.angleOffset;
-
+    
     /* Angle Encoder Config */
     angleEncoder = new CANCoder(moduleConstants.cancoderID);
     configAngleEncoder();
@@ -68,6 +69,8 @@ public class SwerveModule {
     // continuous controller which REV and CTRE are not
 
     if (isOpenLoop) {
+      // TrapezoidProfile d ;
+      // TrapezoidProfile.Constraints f = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
       double percentOutput = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed;
       driveMotor.set(percentOutput);
     } else {
@@ -126,6 +129,7 @@ public class SwerveModule {
     driveController.setD(Constants.Swerve.angleKD);
     driveController.setFF(Constants.Swerve.angleKFF);
     driveMotor.enableVoltageCompensation(Constants.Swerve.voltageComp);
+    
     driveMotor.burnFlash();
     driveEncoder.setPosition(0.0);
   }

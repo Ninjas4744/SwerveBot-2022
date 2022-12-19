@@ -16,6 +16,7 @@ import frc.robot.subsystems.Swerve;
 import java.util.List;
 
 public class exampleAuto extends SequentialCommandGroup {
+    
   public exampleAuto(Swerve s_Swerve) {
     TrajectoryConfig config =
         new TrajectoryConfig(
