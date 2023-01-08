@@ -4,6 +4,13 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS4Controller;
@@ -24,7 +31,7 @@ import frc.robot.subsystems.*;
 public class RobotContainer {
   /* Controllers */
   private final PS4Controller driver = new PS4Controller(0);
-
+  private final limeLight cam = new limeLight();
   /* Drive Controls */
   private final int translationAxis = XboxController.Axis.kLeftY.value;
   private final int strafeAxis = XboxController.Axis.kLeftX.value;
@@ -34,7 +41,7 @@ public class RobotContainer {
   // private final JoystickButton zeroGyro =
   //     new JoystickButton(driver, PS4Controller.Button.kCross);
   private final JoystickButton robotCentric =
-      new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
+      new JoystickButton(driver, 1);
 
   /* Subsystems */
   private final Swerve s_Swerve = new Swerve();
@@ -44,9 +51,9 @@ public class RobotContainer {
     s_Swerve.setDefaultCommand(
         new TeleopSwerve(
             s_Swerve,
-            () -> -driver.getLeftY()*0.3,
-            () -> -driver.getLeftX()*0.3,
-            () -> -driver.getRightX()*0.3,
+            () -> -driver.getLeftY()*0.2,
+            () -> -driver.getLeftX()*0.2,
+            () -> -driver.getRightX()*0.2,
             () -> robotCentric.get()));
 
     // Configure the button bindings
@@ -55,6 +62,7 @@ public class RobotContainer {
 
   /** Actions that we want to do when the robot is disabled. */
   public void disabledActions() {
+    s_Swerve.zeroGyro();
     s_Swerve.resetModuleZeros();
   }
 
@@ -66,7 +74,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     /* Driver Buttons */
-    // zeroGyro.whenPressed(new InstantCommand(() -> s_Swerve.zeroGyro()));
+    // robotCentric.whenPressed(new InstantCommand(() -> s_Swerve.zeroGyro()));
   }
 
   /**
@@ -75,7 +83,31 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return new exampleAuto(s_Swerve);
+    s_Swerve.zeroGyro();
+    s_Swerve.resetModuleZeros();
+    // This will load the file "Example Path.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
+PathPlannerTrajectory examplePath = PathPlanner.loadPath("New New Path", new PathConstraints(3,3
+  // Constants.AutoConstants.kMaxSpeedMetersPerSecond,
+//  Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared
+ ));
+
+// This trajectory can then be passed to a path follower such as a PPSwerveControllerCommand
+// Or the path can be sampled at a given point in time for custom path following
+
+// Sample the state of the path at 1.2 seconds
+PathPlannerState exampleState = (PathPlannerState) examplePath.sample(0);
+// Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+s_Swerve.resetOdometry(exampleState.poseMeters);
+return new PPSwerveControllerCommand(
+            examplePath, 
+            s_Swerve::getPose, // Pose supplier
+            Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+            new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. T une these values for your robot. Leaving them 0 will only use feedforwards.
+            new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+            new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+            s_Swerve::setModuleStates, // Module states consumer
+            s_Swerve // Requires this drive subsystem
+);
+
   }
 }

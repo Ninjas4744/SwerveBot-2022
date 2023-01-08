@@ -8,25 +8,28 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
-
+import frc.robot.subsystems.limeLight;
 public class Swerve extends SubsystemBase {
   public SwerveDriveOdometry swerveOdometry;
   public SwerveModule[] mSwerveMods;
   // public Pigeon2 gyro;
   public AHRS gyro;
-
+  public Field2d m_field = new Field2d();
+  // limeLight curr_lime;
   public Swerve() {
     // gyro = new Pigeon2(Constants.Swerve.pigeonID);
     // gyro.configFactoryDefault();
     // zeroGyro();
     gyro = new AHRS(SPI.Port.kMXP);
+    //swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw());
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw());
-
+    
     mSwerveMods =
         new SwerveModule[] {
           new SwerveModule(0, Constants.Swerve.Mod1.constants),
@@ -34,6 +37,8 @@ public class Swerve extends SubsystemBase {
           new SwerveModule(2, Constants.Swerve.Mod2.constants),
           new SwerveModule(3, Constants.Swerve.Mod3.constants)
         };
+      // curr_lime=new limeLight();
+        
   }
 
   public void drive(
@@ -72,6 +77,7 @@ public class Swerve extends SubsystemBase {
     for (SwerveModule mod : mSwerveMods) {
       mod.resetToAbsolute();
     }
+    resetOdometry(new Pose2d(0, 0,new Rotation2d(0)));
   }
 
   public SwerveModuleState[] getStates() {
@@ -95,14 +101,17 @@ public class Swerve extends SubsystemBase {
   @Override
   public void periodic() {
     swerveOdometry.update(getYaw(), getStates());
-
+    // System.out.println(curr_lime.getTransforemd());
     for (SwerveModule mod : mSwerveMods) {
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
+      // SmartDashboard.putNumber(
+          // "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+      // SmartDashboard.putNumber(
+      //     "Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
+      // SmartDashboard.putNumber(
+      //     "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
+      //     m_field.setRobotPose(swerveOdometry.getPoseMeters());
+      //     SmartDashboard.putData("Field", m_field);
+
     }
   }
 }

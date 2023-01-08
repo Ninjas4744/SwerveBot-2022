@@ -32,13 +32,14 @@ public class TeleopSwerve extends CommandBase {
 
   @Override
   public void execute() {
+    
     /* Get Values, Deadband*/
     double translationVal =
-        MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.Swerve.stickDeadband) * 0.5;
+        MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.Swerve.stickDeadband) * 1;
     double strafeVal =
-        MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.Swerve.stickDeadband) * 0.5;
+        MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.Swerve.stickDeadband) * 1;
     double rotationVal =
-        MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.Swerve.stickDeadband) * 0.5;
+        MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.Swerve.stickDeadband) * 1.0;
 
     /* Drive */
     s_Swerve.drive(
